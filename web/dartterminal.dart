@@ -128,10 +128,10 @@ void processNewCommand(KeyboardEvent e) {
                        
            
            break;
-         /*case 'pwd':
-           output(cwd_.fullPath);
+         case 'pwd':
+           output(cwd.fullPath);
            break;
-         case 'cd':
+         /*case 'cd':
            var dest = args.join(' ') || '/';
 
            cwd_.getDirectory(dest, {}, function(dirEntry) {
