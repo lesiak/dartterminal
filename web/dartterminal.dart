@@ -1,12 +1,14 @@
 import 'dart:html';
 import 'package:dartterminal/fsutils.dart';
+import 'package:dartterminal/terminal.dart';
 
 void main() { 
   InputElement cmdLine = querySelector('#input-line .cmdline');
   int fsQuota = 5*1024*1024;
   window.requestFileSystem(fsQuota, persistent: true)
              .then((fs) => _requestFileSystemCallback(fs), onError: (e) => _logFileError(e));
-  cmdLine.addEventListener('keydown', processNewCommand, false);  
+  cmdLine.addEventListener('keydown', processNewCommand, false);
+  cmdLine.addEventListener('keyup', historyHandler, false); // keyup needed for input blinker to appear at end of input.
 }
 
 void _requestFileSystemCallback(FileSystem filesystem) {
@@ -16,8 +18,9 @@ void _requestFileSystemCallback(FileSystem filesystem) {
 
 FileSystem fs;
 DirectoryEntry cwd;
-List<String> history = [];
-int historyPos = 0;
+
+
+CommandHistory history = new CommandHistory();
 
 void processNewCommand(KeyboardEvent e) {
 //  print('aaa');
@@ -41,8 +44,7 @@ void processNewCommand(KeyboardEvent e) {
 
        // Save shell history.
        if (value.isNotEmpty) {
-         history.add(value);         
-         historyPos = history.length;
+         history.addNewItem(cmdLine.value);
        }
        
       // Duplicate current input and append to output section.
@@ -77,18 +79,13 @@ void processNewCommand(KeyboardEvent e) {
            */ 
          case 'cat':
            var fileName = args.join(' ');
-
            if (fileName.isEmpty) {
              output('usage: ' + cmd + ' filename');
              break;
            }
            read_(cmd, fileName, (result) {
-                        output('<pre>' + result + '</pre>');
-                      });
-         /*  read_(cmd, fileName, function(result) {
-             output('<pre>' + result + '</pre>');
-           });*/
-
+            output('<pre>' + result + '</pre>');
+           });         
            break;
         /* case 'clear':
            clear_(this);
@@ -455,6 +452,45 @@ void read_(cmd, path, successCallback) {
         output(cmd + ': ' + path + ': No such file or directory<br>');
       }
     });
+  }
+
+void historyHandler(e) { // Tab needs to be keydown.
+  InputElement cmdLine = querySelector('#input-line .cmdline');
+  if (history.isNotEmpty) {
+    if (e.keyCode == 38 || e.keyCode == 40) {
+      bool isMoveUp = e.keyCode == 38;
+      String newVal = history.changeLineVal(cmdLine.value, isMoveUp);
+      cmdLine.value = newVal;
+      cmdLine.value = cmdLine.value; // Sets cursor to end of input.
+    }
+  }
+  
+    /*if (history.isNotEmpty) {
+      if (e.keyCode == 38 || e.keyCode == 40) {
+        if (history[histpos]!= null) {
+          history[histpos] = cmdLine.value;
+        } else {
+         histtemp = cmdLine.value;
+        }
+      }
+
+      if (e.keyCode == 38) { // up
+        histpos--;
+        if (histpos < 0) {
+          histpos = 0;
+        }
+      } else if (e.keyCode == 40) { // down
+        histpos++;
+        if (histpos > history.length) {
+          histpos = history.length;
+        }
+      }
+
+      if (e.keyCode == 38 || e.keyCode == 40) {
+        cmdLine.value = history[histpos] != null ? history[histpos] : histtemp;
+        cmdLine.value = cmdLine.value; // Sets cursor to end of input.
+      }
+    }*/
   }
 
 void _logFileError(FileError e) {
