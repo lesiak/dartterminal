@@ -129,22 +129,22 @@ void processNewCommand(KeyboardEvent e) {
          case 'pwd':
            output(cwd.fullPath);
            break;
-         /*case 'cd':
-           var dest = args.join(' ') || '/';
-
-           cwd_.getDirectory(dest, {}, function(dirEntry) {
-             cwd_ = dirEntry;
+         case 'cd':
+           String dest = args.isNotEmpty ? args.join(' ') : '';
+          
+           cwd.getDirectory(dest).then((DirectoryEntry dirEntry) {
+             cwd = dirEntry;
              output('<div>' + dirEntry.fullPath + '</div>');
 
              // Tell FSN visualizer that we're cd'ing.
-             if (fsn_) {
+             /*if (fsn_) {
                fsn_.contentWindow.postMessage({cmd: 'cd', data: dest}, location.origin);
-             }
+             }*/
 
-           }, function(e) { invalidOpForEntryType_(e, cmd, dest); });
+           }, onError: (e) => invalidOpForEntryType(e, cmd, dest));
 
            break;
-         case 'mkdir':
+         /*case 'mkdir':
            var dashP = false;
            var index = args.indexOf('-p');
            if (index != -1) {
@@ -437,35 +437,8 @@ void historyHandler(e) { // Tab needs to be keydown.
       cmdLine.value = newVal;
       cmdLine.value = cmdLine.value; // Sets cursor to end of input.
     }
-  }
-  
-    /*if (history.isNotEmpty) {
-      if (e.keyCode == 38 || e.keyCode == 40) {
-        if (history[histpos]!= null) {
-          history[histpos] = cmdLine.value;
-        } else {
-         histtemp = cmdLine.value;
-        }
-      }
-
-      if (e.keyCode == 38) { // up
-        histpos--;
-        if (histpos < 0) {
-          histpos = 0;
-        }
-      } else if (e.keyCode == 40) { // down
-        histpos++;
-        if (histpos > history.length) {
-          histpos = history.length;
-        }
-      }
-
-      if (e.keyCode == 38 || e.keyCode == 40) {
-        cmdLine.value = history[histpos] != null ? history[histpos] : histtemp;
-        cmdLine.value = cmdLine.value; // Sets cursor to end of input.
-      }
-    }*/
-  }
+  }      
+}
 
 void _logFileError(FileError e) {
      var msg = '';
@@ -491,3 +464,40 @@ void _logFileError(FileError e) {
      }
      print("Error: $msg");
    }
+
+void errorHandler(e) {
+   var msg = '';
+   switch (e.code) {
+     case FileError.QUOTA_EXCEEDED_ERR:
+       msg = 'QUOTA_EXCEEDED_ERR';
+       break;
+     case FileError.NOT_FOUND_ERR:
+       msg = 'NOT_FOUND_ERR';
+       break;
+     case FileError.SECURITY_ERR:
+       msg = 'SECURITY_ERR';
+       break;
+     case FileError.INVALID_MODIFICATION_ERR:
+       msg = 'INVALID_MODIFICATION_ERR';
+       break;
+     case FileError.INVALID_STATE_ERR:
+       msg = 'INVALID_STATE_ERR';
+       break;
+     default:
+       msg = 'Unknown Error';
+       break;
+   };
+   output('<div>Error: ' + msg + '</div>');
+ }
+
+void invalidOpForEntryType(e, cmd, dest) {
+   if (e.code == FileError.NOT_FOUND_ERR) {
+     output(cmd + ': ' + dest + ': No such file or directory<br>');
+   } else if (e.code == FileError.INVALID_STATE_ERR) {
+     output(cmd + ': ' + dest + ': Not a directory<br>');
+   } else if (e.code == FileError.INVALID_MODIFICATION_ERR) {
+     output(cmd + ': ' + dest + ': File already exists<br>');
+   } else {
+     errorHandler(e);     
+   }
+ }
