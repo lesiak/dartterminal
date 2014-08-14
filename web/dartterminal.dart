@@ -21,6 +21,7 @@ int historyPos = 0;
 void processNewCommand(KeyboardEvent e) {
 //  print('aaa');
   /*function processNewCommand_(e) {*/
+  OutputElement output_ =  querySelector('output');
   InputElement cmdLine = querySelector('#input-line .cmdline');
   String value = cmdLine.value;
 //  int aaa = 0;
@@ -42,16 +43,16 @@ void processNewCommand(KeyboardEvent e) {
          history.add(value);         
          historyPos = history.length;
        }
-      /*
-       // Duplicate current input and append to output section.
-       var line = this.parentNode.parentNode.cloneNode(true);
-       line.removeAttribute('id')
-       line.classList.add('line');
+       
+      // Duplicate current input and append to output section.
+       DivElement line = cmdLine.parentNode.parentNode.clone(true);      
+       line.attributes.remove('id');
+       line.classes.add('line');
        var input = line.querySelector('input.cmdline');
        input.autofocus = false;
        input.readOnly = true;
-       output_.appendChild(line);
-      */
+       output_.append(line);
+      
        // Parse out command, args, and trim off whitespace.
        // TODO(ericbidelman): Support multiple comma separated commands.
        String cmd = "";
@@ -118,45 +119,9 @@ void processNewCommand(KeyboardEvent e) {
            }
            break;*/
          case 'ls':           
-           ls_((List<Entry> entries) { 
-             print(entries);
-             if (entries.isNotEmpty) {
-               List<String> html = formatColumns_(entries);
-               Iterable<String> sa =entries.map((Entry entry) => 
-                   '<span class="' 
-                   + ( entry.isDirectory ? 'folder' : 'file' )
-                   +'">'
-                   + entry.name
-                   + '</span><br>'
-               ); 
-               html.addAll(sa);
-               html.add('</div>');
-               //print(sa);
-               //output(sa.toString());
-               output(html.join(''));
-                /*var html = formatColumns_(entries);
-                util.toArray(entries).forEach(function(entry, i) {
-                  html.push(
-                      '<span class="', entry.isDirectory ? 'folder' : 'file',
-                      '">', entry.name, '</span><br>');
-                });
-                html.push('</div>');
-                output(html.join(''));
-              }*/
-             }
-           });
-           /*ls_(function(entries) {
-             if (entries.length) {
-               var html = formatColumns_(entries);
-               util.toArray(entries).forEach(function(entry, i) {
-                 html.push(
-                     '<span class="', entry.isDirectory ? 'folder' : 'file',
-                     '">', entry.name, '</span><br>');
-               });
-               html.push('</div>');
-               output(html.join(''));
-             }
-           });*/
+           ls_((List<Entry> entries) => displayEntries(entries));              
+                       
+           
            break;
          /*case 'pwd':
            output(cwd_.fullPath);
@@ -387,18 +352,43 @@ void processNewCommand(KeyboardEvent e) {
          case 'who':
            output(document.title +
                   ' - By: Eric Bidelman &lt;ericbidelman@chromium.org&gt;');
-           break;
+           break;*/
          default:
-           if (cmd) {
+           if (cmd.isNotEmpty) {
              output(cmd + ': command not found');
            }
-           * */
+           
        };
       
        cmdLine.value = ''; // Clear/setup line for next input.
        
      
    }
+}
+
+void displayEntries(List<Entry> entries) {
+  if (entries.isNotEmpty) {
+    List<String> html = formatColumns_(entries);    
+    Iterable<String> sa = entries.map((Entry entry) => 
+        '<span class="' 
+        + ( entry.isDirectory ? 'folder' : 'file' )
+        +'">'
+        + entry.name
+        + '</span><br>'
+    ); 
+    html.addAll(sa);
+    html.add('</div>');
+    output(html.join(''));
+     /*var html = formatColumns_(entries);
+     util.toArray(entries).forEach(function(entry, i) {
+       html.push(
+           '<span class="', entry.isDirectory ? 'folder' : 'file',
+           '">', entry.name, '</span><br>');
+     });
+     html.push('</div>');
+     output(html.join(''));
+   }*/
+  }    
 }
 
 void output(String html) {
