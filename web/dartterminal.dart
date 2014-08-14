@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'package:dartterminal/fsutils.dart';
 
 void main() { 
   InputElement cmdLine = querySelector('#input-line .cmdline');
@@ -402,30 +403,9 @@ void ls_(successCallback) {
     if (fs == null) {
       return;
     }
+    FileSystemUtils.ls(cwd, successCallback);
 
-    // Read contents of current working directory. According to spec, need to
-    // keep calling readEntries() until length of result array is 0. We're
-    // guarenteed the same entry won't be returned again.
-    List<Entry> entries = [];
-    /*var loudify = (msg) { 
-      print(msg.toUpperCase()); 
-    };*/
-    var reader = cwd.createReader();
-
-    var readEntries;
-    readEntries = () {
-      reader.readEntries().then((List<Entry> results) {
-        if (results.isEmpty) {
-         // entries.sort();
-          successCallback(entries);
-        } else {
-          entries.addAll(results);
-          readEntries();
-        }
-      }, onError: _logFileError);
-    };
-
-    readEntries();
+ 
 }
 
 List<String> formatColumns_(List<Entry> entries) {
