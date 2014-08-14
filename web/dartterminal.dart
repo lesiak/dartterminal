@@ -24,13 +24,10 @@ DirectoryEntry cwd;
 CommandHistory history = new CommandHistory();
 
 void processNewCommand(KeyboardEvent e) {
-//  print('aaa');
-  /*function processNewCommand_(e) {*/
   OutputElement output_ =  querySelector('output');
   InputElement cmdLine = querySelector('#input-line .cmdline');
   String value = cmdLine.value;
-//  int aaa = 0;
-//  print('aaa');
+
      // Beep on backspace and no value on command line.
      //if (!value && e.keyCode == 8) {
        //bell_.stop();
@@ -41,8 +38,7 @@ void processNewCommand(KeyboardEvent e) {
      if (e.keyCode == 9) { // Tab
        e.preventDefault();
        // TODO(ericbidelman): Implement tab suggest.
-     }  else if (e.keyCode == 13) { // enter
-
+     } else if (e.keyCode == 13) { // enter
        // Save shell history.
        if (value.isNotEmpty) {
          history.addNewItem(cmdLine.value);
@@ -122,16 +118,13 @@ void processNewCommand(KeyboardEvent e) {
            }
            break;*/
          case 'ls':           
-           ls_((List<Entry> entries) => displayEntries(entries));              
-                       
-           
+           ls_((List<Entry> entries) => displayEntries(entries));                                                
            break;
          case 'pwd':
            output(cwd.fullPath);
            break;
          case 'cd':
-           String dest = args.isNotEmpty ? args.join(' ') : '';
-          
+           String dest = args.isNotEmpty ? args.join(' ') : '';          
            cwd.getDirectory(dest).then((DirectoryEntry dirEntry) {
              cwd = dirEntry;
              output('<div>' + dirEntry.fullPath + '</div>');
@@ -177,19 +170,19 @@ void processNewCommand(KeyboardEvent e) {
                }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
              }
            });
-           break;
+           break;*/
          case 'cp':
          case 'mv':
+           if (args.length < 2) {
+             output(['usage: ', cmd, ' source target<br>',
+                   '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', cmd,
+                   ' source directory/'].join(''));
+            break; 
+           }
            var src = args[0];
            var dest = args[1];
 
-           if (!src || !dest) {
-             output(['usage: ', cmd, ' source target<br>',
-                    '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', cmd,
-                    ' source directory/'].join(''));
-             break;
-           }
-
+/*
            var runAction = function(cmd, srcDirEntry, destDirEntry, opt_newName) {
              var newName = opt_newName || null;
              if (cmd == 'mv') {
@@ -224,9 +217,9 @@ void processNewCommand(KeyboardEvent e) {
                }, errorHandler_);
              }, errorHandler_);
            }
-
+*/
            break;
-         case 'open':
+  /*       case 'open':
            var fileName = args.join(' ');
 
            if (!fileName) {
