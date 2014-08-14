@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'dart:async';
 import 'package:dartterminal/fsutils.dart';
 import 'package:dartterminal/terminal.dart';
 
@@ -416,20 +417,10 @@ List<String> formatColumns_(List<Entry> entries) {
 void read_(cmd, path, successCallback) {
     if (fs == null) {
       return;
-    }
-
-    cwd.getFile(path).then((FileEntry fileEntry) {
-      fileEntry.file().then((ff) {
-        var reader = new FileReader();
-
-        reader.onLoadEnd.first.then((e) {
-          successCallback(reader.result);
-        });
-
-        reader.readAsText(ff);
-      }, onError: _logFileError);
-    }, onError: (e) {
-      if (e.code == FileError.INVALID_STATE_ERR) {
+    }    
+    Future readerFuture = FileSystemUtils.read(cwd, path, successCallback);
+    readerFuture.catchError((e) {
+      if (e.code == FileError.TYPE_MISMATCH_ERR) {
         output(cmd + ': ' + path + ': is a directory<br>');
       } else if (e.code == FileError.NOT_FOUND_ERR) {
         output(cmd + ': ' + path + ': No such file or directory<br>');
