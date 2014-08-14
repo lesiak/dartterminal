@@ -294,24 +294,7 @@ void processNewCommand(KeyboardEvent e) {
                });
              }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
            });
-           break;
-         case 'sudo':
-           if (timer_ != null) {
-             magicWord_.stop();
-             clearInterval(timer_);
-           }
-           if (!magicWord_) {
-             magicWord_ = new Sound(true);
-             magicWord_.load('magic_word.mp3', false, function() {
-               magicWord_.play();
-             });
-           } else {
-             magicWord_.play();
-           }
-           timer_ = setInterval(function() {
-             output("<div>YOU DIDN'T SAY THE MAGIC WORD!</div>");
-           }, 100);
-           break;
+           break;         
          case 'theme':
            var theme = args.join(' ');
            if (!theme) {
