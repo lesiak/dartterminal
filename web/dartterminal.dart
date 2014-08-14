@@ -57,11 +57,12 @@ void processNewCommand(KeyboardEvent e) {
        // Parse out command, args, and trim off whitespace.
        // TODO(ericbidelman): Support multiple comma separated commands.
        String cmd = "";
+       List<String> args = [];
        if (value.isNotEmpty && value.trim().isNotEmpty) {
          //var args = value.split(' ').filter(function(val, i) {
          //  return val;
          //});
-         var args = value.split(' ');
+         args = value.split(' ');
          cmd = args[0].toLowerCase();
          //args = args.splice(1); // Remove cmd from arg list.
          args = args.sublist(1);
@@ -73,20 +74,23 @@ void processNewCommand(KeyboardEvent e) {
            output('Hold on to your butts!');
            toggle3DView_();
            break;
+           */ 
          case 'cat':
            var fileName = args.join(' ');
 
-           if (!fileName) {
+           if (fileName.isEmpty) {
              output('usage: ' + cmd + ' filename');
              break;
            }
-
-           read_(cmd, fileName, function(result) {
+           read_(cmd, fileName, (result) {
+                        output('<pre>' + result + '</pre>');
+                      });
+         /*  read_(cmd, fileName, function(result) {
              output('<pre>' + result + '</pre>');
-           });
+           });*/
 
            break;
-         case 'clear':
+        /* case 'clear':
            clear_(this);
            return;
          case 'date':
@@ -429,6 +433,29 @@ List<String> formatColumns_(List<Entry> entries) {
             colWidth, 'px;', height, '">'];
   }
 
+void read_(cmd, path, successCallback) {
+    if (fs == null) {
+      return;
+    }
+
+    cwd.getFile(path).then((FileEntry fileEntry) {
+      fileEntry.file().then((ff) {
+        var reader = new FileReader();
+
+        reader.onLoadEnd.first.then((e) {
+          successCallback(reader.result);
+        });
+
+        reader.readAsText(ff);
+      }, onError: _logFileError);
+    }, onError: (e) {
+      if (e.code == FileError.INVALID_STATE_ERR) {
+        output(cmd + ': ' + path + ': is a directory<br>');
+      } else if (e.code == FileError.NOT_FOUND_ERR) {
+        output(cmd + ': ' + path + ': No such file or directory<br>');
+      }
+    });
+  }
 
 void _logFileError(FileError e) {
      var msg = '';
