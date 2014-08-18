@@ -18,6 +18,12 @@ void _requestFileSystemCallback(FileSystem filesystem) {
   cwd = filesystem.root;   
 }
 
+const VERSION = '1.0.0';
+const CMDS = const [
+    'cat', 'cd', 'cp', 'clear', 'date', 'help', 'ls', 'mkdir',
+    'mv', 'open', 'pwd', 'rm', 'rmdir', 'theme', 'version', 'who', 'wget'
+  ];
+
 FileSystem fs;
 DirectoryEntry cwd;
 TerminalDisplay display = new TerminalDisplay();
@@ -80,7 +86,7 @@ void processNewCommand(KeyboardEvent e) {
            });         
            break;
          case 'clear':
-           clear();
+           display.clear();
            return;
          case 'date':
            var now = new DateTime.now();           
@@ -99,20 +105,7 @@ void processNewCommand(KeyboardEvent e) {
            output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
            output('<p>Add files by dragging them from your desktop.</p>');
            break;
-         case 'install':
-           // Check is installed.
-           if (window.chrome && window.chrome.app) {
-             if (!window.chrome.app.isInstalled) {
-               try {
-                 chrome.app.install();
-               } catch(e) {
-                 alert(e + '\nEnable is about:flags');
-               }
-             } else {
-               output('This app is already installed.');
-             }
-           }
-           break;*/
+          */
          case 'ls':           
            ls_((List<Entry> entries) => display.displayEntries(entries));                                                
            break;
@@ -283,12 +276,12 @@ void processNewCommand(KeyboardEvent e) {
                output('Error - Unrecognized theme used');
              }
            }
-           break;
+           break;*/
          case 'version':
          case 'ver':
-           output(VERSION_);
+           output(VERSION);
            break;
-         case 'wget':
+         /*case 'wget':
            var url = args[0];
            if (!url) {
              output(['usage: ', cmd, ' missing URL'].join(''));
@@ -335,9 +328,6 @@ void output(String html) {
   display.output(html);  
 }
 
-void clear() {
-  display.clear();  
- }
 
 void ls_(successCallback) {
     if (fs == null) {
