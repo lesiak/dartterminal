@@ -100,12 +100,11 @@ void processNewCommand(KeyboardEvent e) {
              magicWord_.stop();
              clearInterval(timer_);
            }
-           break;
+           break;*/
          case 'help':
-           output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
+           output('<div class="ls-files">' + CMDS.join('<br>') + '</div>');
            output('<p>Add files by dragging them from your desktop.</p>');
            break;
-          */
          case 'ls':           
            ls_((List<Entry> entries) => display.displayEntries(entries));                                                
            break;
