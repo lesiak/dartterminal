@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:async';
 import 'package:dartterminal/fsutils.dart';
 import 'package:dartterminal/terminal.dart';
+import 'terminaldisplay.dart';
 
 void main() { 
   InputElement cmdLine = querySelector('#input-line .cmdline');
@@ -19,7 +20,7 @@ void _requestFileSystemCallback(FileSystem filesystem) {
 
 FileSystem fs;
 DirectoryEntry cwd;
-
+TerminalDisplay display = new TerminalDisplay();
 
 CommandHistory history = new CommandHistory();
 
@@ -113,7 +114,7 @@ void processNewCommand(KeyboardEvent e) {
            }
            break;*/
          case 'ls':           
-           ls_((List<Entry> entries) => displayEntries(entries));                                                
+           ls_((List<Entry> entries) => display.displayEntries(entries));                                                
            break;
          case 'pwd':
            output(cwd.fullPath);
@@ -238,41 +239,21 @@ void processNewCommand(KeyboardEvent e) {
            if (worker_) {
              worker_.postMessage({cmd: 'init', type: type_, size: size_});
            }
-           break;
+           break;*/
          case 'rm':
            // Remove recursively? If so, remove the flag(s) from the arg list.
            var recursive = false;
-           ['-r', '-f', '-rf', '-fr'].forEach(function(arg, i) {
+           ['-r', '-f', '-rf', '-fr'].forEach((arg) {
              var index = args.indexOf(arg);
              if (index != -1) {
-               args.splice(index, 1);
+               args.removeAt(index);
                recursive = true;
              }
            });
-
            // Remove each file passed as an argument.
-           args.forEach(function(fileName, i) {
-             cwd_.getFile(fileName, {}, function(fileEntry) {
-               fileEntry.remove(function() {
-                 // Tell FSN visualizer that we're rm'ing.
-                 if (fsn_) {
-                   fsn_.contentWindow.postMessage({cmd: 'rm', data: fileName}, location.origin);
-                 }
-               }, errorHandler_);
-             }, function(e) {
-               if (recursive && e.code == FileError.TYPE_MISMATCH_ERR) {
-                 cwd_.getDirectory(fileName, {}, function(dirEntry) {
-                   dirEntry.removeRecursively(null, errorHandler_);
-                 }, errorHandler_);
-               } else if (e.code == FileError.INVALID_STATE_ERR) {
-                 output(cmd + ': ' + fileName + ': is a directory<br>');
-               } else {
-                 errorHandler_(e);
-               }
-             });
-           });
+           args.forEach((fileName) => rm(fileName, recursive, cmd));
            break;
-         case 'rmdir':
+         /*case 'rmdir':
            // Remove each directory passed as an argument.
            args.forEach(function(dirName, i) {
              cwd_.getDirectory(dirName, {}, function(dirEntry) {
@@ -347,47 +328,15 @@ void processNewCommand(KeyboardEvent e) {
    }
 }
 
-void displayEntries(List<Entry> entries) {
-  if (entries.isNotEmpty) {
-    List<String> html = formatColumns_(entries);    
-    Iterable<String> sa = entries.map((Entry entry) => 
-        '<span class="' 
-        + ( entry.isDirectory ? 'folder' : 'file' )
-        +'">'
-        + entry.name
-        + '</span><br>'
-    ); 
-    html.addAll(sa);
-    html.add('</div>');
-    output(html.join(''));
-     /*var html = formatColumns_(entries);
-     util.toArray(entries).forEach(function(entry, i) {
-       html.push(
-           '<span class="', entry.isDirectory ? 'folder' : 'file',
-           '">', entry.name, '</span><br>');
-     });
-     html.push('</div>');
-     output(html.join(''));
-   }*/
-  }    
-}
 
 
 
 void output(String html) {
-  InputElement cmdLine = querySelector('#input-line .cmdline');
-  OutputElement output_ =  querySelector('output');
-  output_.insertAdjacentHtml('beforeEnd', html);       
-  cmdLine.scrollIntoView();
+  display.output(html);  
 }
 
 void clear() {
-  InputElement cmdLine = querySelector('#input-line .cmdline');
-  OutputElement output_ =  querySelector('output');
-  output_.setInnerHtml('');
-  cmdLine.value = '';
-  document.documentElement.style.height = '100%';
-  // interlace_.style.height = '100%';
+  display.clear();  
  }
 
 void ls_(successCallback) {
@@ -396,6 +345,29 @@ void ls_(successCallback) {
     }
     FileSystemUtils.ls(cwd, successCallback);
 }
+
+
+void rm(String name, bool recursive, String cmd) {
+  cwd.getFile(name).then((Entry fileEntry) {
+      fileEntry.remove().then((__x) {
+        // Tell FSN visualizer that we're rm'ing.
+       // if (fsn_) {
+        //  fsn_.contentWindow.postMessage({cmd: 'rm', data: fileName}, location.origin);
+       // }
+      }, onError: errorHandler);
+    }, onError: ((e) {
+      if (recursive && e.code == FileError.TYPE_MISMATCH_ERR) {
+        cwd.getDirectory(name).then((DirectoryEntry dirEntry) {
+          dirEntry.removeRecursively().then((__x) {}, onError: errorHandler);
+        }, onError: errorHandler);
+      } else if (e.code == FileError.INVALID_STATE_ERR) {
+        output(cmd + ': ' + name + ': is a directory<br>');
+      } else {
+        errorHandler(e);
+      }
+  }));
+}
+
 
 void createDir_(DirectoryEntry rootDirEntry, List<String> folders) {  
   var fHead = folders[0];
@@ -422,26 +394,6 @@ void open_(cmd, path, successCallback) {
     });
   }
 
-List<String> formatColumns_(List<Entry> entries) {
-    var maxName = entries[0].name;
-    entries.forEach((entry) {
-      if (entry.name.length > maxName.length) {
-        maxName = entry.name;
-      }
-    });
-    
-
-    // If we have 3 or less entries, shorten the output container's height.
-    // 15px height with a monospace font-size of ~12px;
-    var height = entries.length == 1 ? 'height: ' + (entries.length * 30).toString() + 'px;' :
-                 entries.length <= 3 ? 'height: ' + (entries.length * 18).toString() + 'px;' : '';
-
-    // ~12px monospace font yields ~8px screen width.
-    var colWidth = maxName.length * 16;//;8;
-
-    return ['<div class="ls-files" style="-webkit-column-width:',
-            colWidth, 'px;', height, '">'];
-  }
 
 void read_(cmd, path, successCallback) {
     if (fs == null) {
