@@ -67,13 +67,7 @@ void processNewCommand(KeyboardEvent e) {
          args = args.sublist(1);
        }
 
-       switch (cmd) {
-         /*case '3d':
-           clear_(this);
-           output('Hold on to your butts!');
-           toggle3DView_();
-           break;
-           */ 
+       switch (cmd) {         
          case 'cat':
            var fileName = args.join(' ');
            if (fileName.isEmpty) {
@@ -84,10 +78,10 @@ void processNewCommand(KeyboardEvent e) {
             output('<pre>' + result + '</pre>');
            });         
            break;
-        /* case 'clear':
-           clear_(this);
+         case 'clear':
+           clear();
            return;
-         case 'date':
+        /* case 'date':
            output((new Date()).toLocaleString());
            break;
          case 'exit':
@@ -179,9 +173,10 @@ void processNewCommand(KeyboardEvent e) {
                    ' source directory/'].join(''));
             break; 
            }
-           var src = args[0];
-           var dest = args[1];
+           String src = args[0];
+           String dest = args[1];
 
+           
 /*
            var runAction = function(cmd, srcDirEntry, destDirEntry, opt_newName) {
              var newName = opt_newName || null;
@@ -191,26 +186,30 @@ void processNewCommand(KeyboardEvent e) {
                  srcDirEntry.copyTo(destDirEntry, newName);
                }
            };
-
+*/
            // Moving to a folder? (e.g. second arg ends in '/').
            if (dest[dest.length - 1] == '/') {
-             cwd_.getDirectory(src, {}, function(srcDirEntry) {
+             cwd.getDirectory(src).then((DirectoryEntry srcDirEntry) {
                // Create blacklist for dirs we can't re-create.
-               var create = [
+               bool create = [
                  '.', './', '..', '../', '/'].indexOf(dest) != -1 ? false : true;
+               var cmd = create ? cwd.createDirectory : cwd.getDirectory;
+               
 
-               cwd_.getDirectory(dest, {create: create}, function(destDirEntry) {
-                 runAction(cmd, srcDirEntry, destDirEntry);
-               }, errorHandler_);
-             }, function(e) {
+               cmd(dest).then((destDirEntry) {
+                 print('action dir to dir');
+                 //runAction(cmd, srcDirEntry, destDirEntry);
+               }, onError: errorHandler);
+             }, onError: (e) {
+               print('aaaaaaaaaaaaaaaaaaaaaaa');
                // Try the src entry as a file instead.
-               cwd_.getFile(src, {}, function(srcDirEntry) {
+               /*cwd_.getFile(src, {}, function(srcDirEntry) {
                  cwd_.getDirectory(dest, {}, function(destDirEntry) {
                    runAction(cmd, srcDirEntry, destDirEntry);
-                 }, errorHandler_);
-               }, errorHandler_);
+                 }, onError: errorHandler);
+               }, onError: errorHandler);*/
              });
-           } else { // Treat src/destination as files.
+           } /*else { // Treat src/destination as files.
              cwd_.getFile(src, {}, function(srcFileEntry) {
                srcFileEntry.getParent(function(parentDirEntry) {
                  runAction(cmd, srcFileEntry, parentDirEntry, dest);
@@ -370,11 +369,22 @@ void displayEntries(List<Entry> entries) {
   }    
 }
 
+
+
 void output(String html) {
   InputElement cmdLine = querySelector('#input-line .cmdline');
   OutputElement output_ =  querySelector('output');
   output_.insertAdjacentHtml('beforeEnd', html);       
   cmdLine.scrollIntoView();
+}
+
+void clear() {
+  InputElement cmdLine = querySelector('#input-line .cmdline');
+  OutputElement output_ =  querySelector('output');
+  output_.setInnerHtml('');
+  cmdLine.value = '';
+  document.documentElement.style.height = '100%';
+  // interlace_.style.height = '100%';
  }
 
 void ls_(successCallback) {
