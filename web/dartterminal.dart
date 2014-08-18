@@ -132,40 +132,42 @@ void processNewCommand(KeyboardEvent e) {
            }, onError: (e) => invalidOpForEntryType(e, cmd, dest));
 
            break;
-         /*case 'mkdir':
+         case 'mkdir':
            var dashP = false;
            var index = args.indexOf('-p');
            if (index != -1) {
-             args.splice(index, 1);
+           //  args.splice(index, 1);
+           //  dashP = true;
+             args.removeAt(index);             
              dashP = true;
            }
 
-           if (!args.length) {
+           if (args.isEmpty) {
              output('usage: ' + cmd + ' [-p] directory<br>');
              break;
            }
 
            // Create each directory passed as an argument.
-           args.forEach(function(dirName, i) {
+           args.forEach((dirName) {
              if (dashP) {
                var folders = dirName.split('/');
 
                // Throw out './' or '/' if present on the beginning of our path.
                if (folders[0] == '.' || folders[0] == '') {
-                 folders = folders.slice(1);
+                 folders = folders.sublist(1);
                }
 
-               createDir_(cwd_, folders);
+               createDir_(cwd, folders);
              } else {
-               cwd_.getDirectory(dirName, {create: true, exclusive: true}, function() {
+               cwd.createDirectory(dirName, exclusive: true).then((entry) {
                  // Tell FSN visualizer that we're mkdir'ing.
-                 if (fsn_) {
-                   fsn_.contentWindow.postMessage({cmd: 'mkdir', data: dirName}, location.origin);
-                 }
-               }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
+                 //if (fsn_) {
+                 //  fsn_.contentWindow.postMessage({cmd: 'mkdir', data: dirName}, location.origin);
+                // }
+               }, onError: (e) { invalidOpForEntryType(e, cmd, dirName); });
              }
            });
-           break;*/
+           break;
          case 'cp':
          case 'mv':
            if (args.length < 2) {
@@ -393,8 +395,18 @@ void ls_(successCallback) {
       return;
     }
     FileSystemUtils.ls(cwd, successCallback);
+}
 
- 
+void createDir_(DirectoryEntry rootDirEntry, List<String> folders) {  
+  var fHead = folders[0];
+  var fTail = folders.sublist(1);
+  rootDirEntry.createDirectory(fHead).then((dirEntry) {
+
+    // Recursively add the new subfolder if we still have a subfolder to create.
+    if (fTail.isNotEmpty) {
+      createDir_(dirEntry, fTail);
+    }
+  }, onError: _logFileError);
 }
 
 List<String> formatColumns_(List<Entry> entries) {
