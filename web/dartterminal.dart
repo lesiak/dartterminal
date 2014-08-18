@@ -221,20 +221,20 @@ void processNewCommand(KeyboardEvent e) {
            }
 */
            break;
-  /*       case 'open':
+         case 'open':
            var fileName = args.join(' ');
 
-           if (!fileName) {
+           if (fileName.isEmpty) {
              output('usage: ' + cmd + ' filename');
              break;
            }
 
-           open_(cmd, fileName, function(fileEntry) {
-             var myWin = window.open(fileEntry.toURL(), 'mywin');
+           open_(cmd, fileName, (Entry fileEntry) {
+             var myWin = window.open(fileEntry.toUrl(), 'mywin');
            });
 
            break;
-         case 'init':
+  /*       case 'init':
            if (worker_) {
              worker_.postMessage({cmd: 'init', type: type_, size: size_});
            }
@@ -408,6 +408,19 @@ void createDir_(DirectoryEntry rootDirEntry, List<String> folders) {
     }
   }, onError: _logFileError);
 }
+
+void open_(cmd, path, successCallback) {
+    if (fs == null) {
+      return;
+    }
+
+    cwd.getFile(path).then((entry) => successCallback(entry),
+        onError: (e) {
+      if (e.code == FileError.NOT_FOUND_ERR) {
+        output(cmd + ': ' + path + ': No such file or directory<br>');
+      }
+    });
+  }
 
 List<String> formatColumns_(List<Entry> entries) {
     var maxName = entries[0].name;
