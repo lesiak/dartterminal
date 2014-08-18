@@ -11,6 +11,30 @@ void main() {
              .then((fs) => _requestFileSystemCallback(fs), onError: (e) => _logFileError(e));
   cmdLine.addEventListener('keydown', processNewCommand, false);
   cmdLine.addEventListener('keyup', historyHandler, false); // keyup needed for input blinker to appear at end of input.
+  
+  document.body.addEventListener('dragenter', (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      document.body.classes.add('dropping');
+    }, false);
+
+    document.body.addEventListener('dragover', (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+    }, false);
+
+    document.body.addEventListener('dragleave', (e) {
+      document.body.classes.remove('dropping');
+    }, false);
+    
+    document.body.addEventListener('drop', (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      document.body.classes.remove('dropping');
+      addDroppedFiles(e.dataTransfer.files);
+      display.output('<div>File(s) added!</div>');
+    }, false);
 }
 
 void _requestFileSystemCallback(FileSystem filesystem) {
@@ -320,7 +344,21 @@ void processNewCommand(KeyboardEvent e) {
    }
 }
 
+void addDroppedFiles(files) {
+  files.forEach((file) {
+    cwd.createFile(file.name, exclusive: true).then((FileEntry fileEntry) {
 
+          // Tell FSN visualizer we've added a file.
+          //if (fsn_) {
+//            fsn_.contentWindow.postMessage({cmd: 'touch', data: file.name}, location.origin);
+  //        }
+          
+          fileEntry.createWriter().then((FileWriter fileWriter) {
+            fileWriter.write(file);
+          }, onError: errorHandler);
+        }, onError: errorHandler);
+      });
+    }
 
 
 void output(String html) {
