@@ -81,10 +81,11 @@ void processNewCommand(KeyboardEvent e) {
          case 'clear':
            clear();
            return;
-        /* case 'date':
-           output((new Date()).toLocaleString());
+         case 'date':
+           var now = new DateTime.now();           
+           output(now.toString());
            break;
-         case 'exit':
+        /* case 'exit':
            if (is3D_) {
              toggle3DView_();
            }
