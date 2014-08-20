@@ -7,7 +7,7 @@ import 'terminaldisplay.dart';
 
 void main() { 
   InputElement cmdLine = querySelector('#input-line .cmdline');
-  int fsQuota = 5*1024*1024;
+  int fsQuota = 5*1024*1024*1024;
   window.requestFileSystem(fsQuota, persistent: true)
              .then((fs) => _requestFileSystemCallback(fs), onError: (e) => _logFileError(e));
   cmdLine.addEventListener('keydown', processNewCommand, false);
@@ -405,7 +405,7 @@ void createDir_(DirectoryEntry rootDirEntry, List<String> folders) {
     if (fTail.isNotEmpty) {
       createDir_(dirEntry, fTail);
     }
-  }, onError: _logFileError);
+  }, onError: errorHandler);
 }
 
 void open_(cmd, path, successCallback) {
@@ -467,7 +467,7 @@ Future<FileEntry> saveBlob(String name, Blob blob) {
    Future<FileEntry> ret = cwd.createFile(name)
      .then((entry) => _writeBlob(entry, blob), 
        onError: (e)  {
-         _logFileError(e.error);
+         errorHandler(e.error);
          throw e;
      });
      return ret;
@@ -497,30 +497,6 @@ void historyHandler(e) { // Tab needs to be keydown.
   }      
 }
 
-void _logFileError(FileError e) {
-     var msg = '';
-     switch (e.code) {
-       case FileError.QUOTA_EXCEEDED_ERR:
-         msg = 'QUOTA_EXCEEDED_ERR';
-         break;
-       case FileError.NOT_FOUND_ERR:
-         msg = 'NOT_FOUND_ERR';
-         break;
-       case FileError.SECURITY_ERR:
-         msg = 'SECURITY_ERR';
-         break;
-       case FileError.INVALID_MODIFICATION_ERR:
-         msg = 'INVALID_MODIFICATION_ERR';
-         break;
-       case FileError.INVALID_STATE_ERR:
-         msg = 'INVALID_STATE_ERR';
-         break;
-       default:
-         msg = 'Unknown Error';
-         break;
-     }
-     print("Error: $msg");
-   }
 
 void errorHandler(e) {
    var msg = '';
