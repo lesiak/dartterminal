@@ -330,7 +330,7 @@ void rm(String name, bool recursive, String cmd) {
         cwd.getDirectory(name).then((DirectoryEntry dirEntry) {
           dirEntry.removeRecursively().then((__x) {}, onError: errorHandler);
         }, onError: errorHandler);
-      } else if (e.code == FileError.INVALID_STATE_ERR) {
+      } else if (e.code == FileError.TYPE_MISMATCH_ERR) {
         output(cmd + ': ' + name + ': is a directory<br>');
       } else {
         errorHandler(e);
