@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class TerminalDisplay {
   
-  
+  static const THEMES = const ['default', 'cream'];
   
   void duplicateInputToOutput() {
     InputElement cmdLine = querySelector('#input-line .cmdline');
@@ -54,6 +54,23 @@ class TerminalDisplay {
       outputHtml(html.join(''));     
     }    
   }
+  
+  void setTheme(String theme) {
+      //var currentUrl = document.location.pathname;
+
+      if (theme.isEmpty || theme == 'default') {
+        //history.replaceState({}, '', currentUrl);
+        window.localStorage.remove('theme');
+        document.body.className = '';
+        return;
+      }
+
+      if (theme.isNotEmpty) {
+        document.body.classes.add(theme);
+        window.localStorage['theme'] = theme;
+        //history.replaceState({}, '', currentUrl + '#theme=' + theme);
+      }
+    }
 
   
   List<String> _formatColumns(List<Entry> entries) {

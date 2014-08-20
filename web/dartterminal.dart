@@ -46,7 +46,7 @@ void _requestFileSystemCallback(FileSystem filesystem) {
 const VERSION = '1.0.0';
 const CMDS = const [
     'cat', 'cd', 'cp', 'clear', 'date', 'help', 'ls', 'mkdir',
-    'mv', 'open', 'pwd', 'rm', 'rmdir', 'theme', 'version', 'who', 'wget'
+    'mv', 'open', 'pwd', 'rm', 'rmdir', 'theme', 'version', 'wget'
   ];
 
 FileSystem fs;
@@ -108,16 +108,7 @@ void processNewCommand(KeyboardEvent e) {
          case 'date':
            var now = new DateTime.now();           
            output(now.toString());
-           break;
-        /* case 'exit':
-           if (is3D_) {
-             toggle3DView_();
-           }
-           if (timer_ != null) {
-             magicWord_.stop();
-             clearInterval(timer_);
-           }
-           break;*/
+           break;        
          case 'help':
            output('<div class="ls-files">' + CMDS.join('<br>') + '</div>');
            output('<p>Add files by dragging them from your desktop.</p>');
@@ -147,7 +138,7 @@ void processNewCommand(KeyboardEvent e) {
            var index = args.indexOf('-p');
            if (index != -1) {
            //  args.splice(index, 1);
-           //  dashP = true;
+           //  makeParents = true;
              args.removeAt(index);             
              makeParents = true;
            }
@@ -258,50 +249,26 @@ void processNewCommand(KeyboardEvent e) {
                });
              }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
            });
-           break;         
+           break; */        
          case 'theme':
-           var theme = args.join(' ');
-           if (!theme) {
-             output(['usage: ', cmd, ' ' + THEMES_.join(',')].join(''));
-           } else {
-             if (THEMES_.indexOf(theme) != -1) {
-               setTheme_(theme);
-             } else {
-               output('Error - Unrecognized theme used');
-             }
-           }
-           break;*/
+           String theme = args.join(' ');
+           themeCommand(theme, cmd);
+           break;
          case 'version':
          case 'ver':
            output(VERSION);
            break;
-         /*case 'wget':
-           var url = args[0];
-           if (!url) {
+         case 'wget':           
+           if (args.isEmpty || args[0].trim().isEmpty) {
              output(['usage: ', cmd, ' missing URL'].join(''));
              break;
-           } else if (url.search('^http://') == -1) {
+           } 
+           var url = args[0].trim();
+           if (!url.startsWith('http://')) {
              url = 'http://' + url;
            }
-           var xhr = new XMLHttpRequest();
-           xhr.onload = function(e) {
-             if (this.status == 200 && this.readyState == 4) {
-               output('<textarea>' + this.response + '</textarea>');
-             } else {
-               output('ERROR: ' + this.status + ' ' + this.statusText);
-             }
-           };
-           xhr.onerror = function(e) {
-             output('ERROR: ' + this.status + ' ' + this.statusText);
-             output('Could not fetch ' + url);
-           };
-           xhr.open('GET', url, true);
-           xhr.send();
-           break;
-         case 'who':
-           output(document.title +
-                  ' - By: Eric Bidelman &lt;ericbidelman@chromium.org&gt;');
-           break;*/
+           wgetCommand(url);                     
+           break;         
          case 'testunzip':
            String path = 'dupa.zip';
            testUnzip(path);
@@ -461,6 +428,15 @@ void testUnzip(String path) {
   });
 }
 
+void wgetCommand(String url) {
+  HttpRequest.getString(url).then((String response) {
+     output('<textarea>' + response + '</textarea>');
+   }, onError: (ProgressEvent e) {             
+     HttpRequest target = e.currentTarget;
+     output('ERROR: ${target.status} ${target.statusText}');
+   });    
+}
+
 void historyHandler(e) { // Tab needs to be keydown.
   InputElement cmdLine = querySelector('#input-line .cmdline');
   if (history.isNotEmpty) {
@@ -471,6 +447,19 @@ void historyHandler(e) { // Tab needs to be keydown.
       cmdLine.value = cmdLine.value; // Sets cursor to end of input.
     }
   }      
+}
+
+void themeCommand(String theme, String cmd) {
+  if (theme.isEmpty) {
+     display.outputHtml(['usage: ', cmd, ' ' + TerminalDisplay.THEMES.join(',')].join(''));
+   } else {
+     //display.setTheme(theme);
+     if (TerminalDisplay.THEMES.indexOf(theme) != -1) {
+       display.setTheme(theme);
+     } else {
+       output('Error - Unrecognized theme used');
+     }
+   }  
 }
 
 
