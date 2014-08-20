@@ -100,9 +100,7 @@ void processNewCommand(KeyboardEvent e) {
              output('usage: ' + cmd + ' filename');
              break;
            }
-           read_(cmd, fileName, (result) {
-            display.outputEscaped(result);
-           });         
+           catCommand(cmd, fileName);
            break;
          case 'clear':
            display.clear();
@@ -422,12 +420,14 @@ void open_(cmd, path, successCallback) {
   }
 
 
-void read_(cmd, path, successCallback) {
+void catCommand(cmd, path) {
   if (fs == null) {
     return;
   }    
-  Future readerFuture = FileSystemUtils.readAsText(cwd, path, successCallback);
-  readerFuture.catchError((e) {
+  Future<String> textFuture = FileSystemUtils.readAsText(cwd, path);
+  textFuture.then((s) {
+    display.outputEscaped(s);
+  }).catchError((e) {
     if (e.code == FileError.TYPE_MISMATCH_ERR) {
       output(cmd + ': ' + path + ': is a directory<br>');
     } else if (e.code == FileError.NOT_FOUND_ERR) {
@@ -440,7 +440,7 @@ void testUnzip(String path) {
   if (fs == null) {
     return;
   }    
-  Future readerFuture = FileSystemUtils.readAsArrayBuffer(cwd, path, (List<int> bytes) {    
+  /*Future readerFuture = FileSystemUtils.readAsArrayBuffer(cwd, path, (List<int> bytes) {    
     Archive archive = new ZipDecoder().decodeBytes(bytes);
     for (ArchiveFile file in archive) {
       String filename = file.name;
@@ -460,7 +460,7 @@ void testUnzip(String path) {
     }*/
        
     errorHandler(e);
-  });
+  });*/
 }
 
 Future<FileEntry> saveBlob(String name, Blob blob) {    

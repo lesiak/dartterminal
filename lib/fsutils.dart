@@ -25,64 +25,39 @@ class FileSystemUtils {
             entries.addAll(results);
             readEntries();
           }
-        }, onError: _logFileError);
+        });
       };
 
       readEntries();
   }
   
-  static Future readAsText(DirectoryEntry dir, String path, successCallback) {
-    Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
-          fileEntry.file().then((ff) {
-            var reader = new FileReader();
-
-            reader.onLoadEnd.first.then((e) {
-              successCallback(reader.result);
-            });            
-            reader.readAsText(ff);
-          }, onError: _logFileError);
-        });
+  static Future<String> readAsText(DirectoryEntry dir, String path) {
+    Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) => _getTextFromFileEntry(fileEntry));
     return readerFuture;
   }
   
+  static Future<String> _getTextFromFileEntry(FileEntry fileEntry) {
+    return fileEntry.file().then((ff) {
+      var reader = new FileReader();
+      Future<String> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
+      reader.readAsText(ff);
+      return resultFut;
+    });
+      
+  }
   
-  static Future readAsArrayBuffer(DirectoryEntry dir, String path, successCallback) {
+  static Future<List<int>> readAsArrayBuffer(DirectoryEntry dir, String path/*, successCallback*/) {
       Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
             fileEntry.file().then((ff) {
               var reader = new FileReader();
 
               reader.onLoadEnd.first.then((e) {
-                successCallback(reader.result);
+               // successCallback(reader.result);
               });            
               reader.readAsArrayBuffer(ff);
-            }, onError: _logFileError);
+            });
           });
       return readerFuture;
-    }
-  
-  static void _logFileError(FileError e) {
-       var msg = '';
-       switch (e.code) {
-         case FileError.QUOTA_EXCEEDED_ERR:
-           msg = 'QUOTA_EXCEEDED_ERR';
-           break;
-         case FileError.NOT_FOUND_ERR:
-           msg = 'NOT_FOUND_ERR';
-           break;
-         case FileError.SECURITY_ERR:
-           msg = 'SECURITY_ERR';
-           break;
-         case FileError.INVALID_MODIFICATION_ERR:
-           msg = 'INVALID_MODIFICATION_ERR';
-           break;
-         case FileError.INVALID_STATE_ERR:
-           msg = 'INVALID_STATE_ERR';
-           break;
-         default:
-           msg = 'Unknown Error';
-           break;
-       }
-       print("Error: $msg");
-     }
+    }   
   
 }
