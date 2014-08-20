@@ -34,7 +34,7 @@ void main() {
       e.preventDefault();
       document.body.classes.remove('dropping');
       addDroppedFiles(e.dataTransfer.files);
-      display.output('<div>File(s) added!</div>');
+      display.outputHtml('<div>File(s) added!</div>');
     }, false);
 }
 
@@ -101,7 +101,7 @@ void processNewCommand(KeyboardEvent e) {
              break;
            }
            read_(cmd, fileName, (result) {
-            output('<pre>' + result + '</pre>');
+            display.outputEscaped(result);
            });         
            break;
          case 'clear':
@@ -362,7 +362,7 @@ void addDroppedFiles(files) {
 
 
 void output(String html) {
-  display.output(html);
+  display.outputHtml(html);
 }
 
 

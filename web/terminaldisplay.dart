@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'dart:convert';
 
 class TerminalDisplay {
   
@@ -16,12 +17,18 @@ class TerminalDisplay {
     output_.append(line);
   }
   
-  void output(String html) {
+  void outputHtml(String html) {
     InputElement cmdLine = querySelector('#input-line .cmdline');
     OutputElement output_ =  querySelector('output');
     output_.insertAdjacentHtml('beforeEnd', html);       
     cmdLine.scrollIntoView();
   }
+  
+  
+  void outputEscaped(String htmlText) {
+      String result = HTML_ESCAPE.convert(htmlText);
+      outputHtml('<pre>' + result + '</pre>');
+    }
 
   void clear() {
     InputElement cmdLine = querySelector('#input-line .cmdline');
@@ -44,7 +51,7 @@ class TerminalDisplay {
       ); 
       html.addAll(sa);
       html.add('</div>');
-      output(html.join(''));     
+      outputHtml(html.join(''));     
     }    
   }
 
