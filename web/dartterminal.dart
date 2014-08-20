@@ -143,13 +143,13 @@ void processNewCommand(KeyboardEvent e) {
 
            break;
          case 'mkdir':
-           var dashP = false;
+           var makeParents = false; // no error if existing, make parent directories as needed
            var index = args.indexOf('-p');
            if (index != -1) {
            //  args.splice(index, 1);
            //  dashP = true;
              args.removeAt(index);             
-             dashP = true;
+             makeParents = true;
            }
 
            if (args.isEmpty) {
@@ -158,25 +158,7 @@ void processNewCommand(KeyboardEvent e) {
            }
 
            // Create each directory passed as an argument.
-           args.forEach((dirName) {
-             if (dashP) {
-               var folders = dirName.split('/');
-
-               // Throw out './' or '/' if present on the beginning of our path.
-               if (folders[0] == '.' || folders[0] == '') {
-                 folders = folders.sublist(1);
-               }
-
-               createDir_(cwd, folders);
-             } else {
-               cwd.createDirectory(dirName, exclusive: true).then((entry) {
-                 // Tell FSN visualizer that we're mkdir'ing.
-                 //if (fsn_) {
-                 //  fsn_.contentWindow.postMessage({cmd: 'mkdir', data: dirName}, location.origin);
-                // }
-               }, onError: (e) { invalidOpForEntryType(e, cmd, dirName); });
-             }
-           });
+           args.forEach((dirName) => mkDir(dirName, makeParents, cmd));
            break;
          case 'cp':
          case 'mv':
@@ -233,15 +215,11 @@ void processNewCommand(KeyboardEvent e) {
            break;
          case 'open':
            var fileName = args.join(' ');
-
            if (fileName.isEmpty) {
              output('usage: ' + cmd + ' filename');
              break;
            }
-
-           open_(cmd, fileName, (Entry fileEntry) {
-             var myWin = window.open(fileEntry.toUrl(), 'mywin');
-           });
+           openCommand(cmd, fileName);
 
            break;
   /*       case 'init':
@@ -393,6 +371,25 @@ void rm(String name, bool recursive, String cmd) {
   }));
 }
 
+void mkDir(String dirName, bool makeParents, String cmd){
+  if (makeParents) {
+     var folders = dirName.split('/');
+
+     // Throw out './' or '/' if present on the beginning of our path.
+     if (folders[0] == '.' || folders[0] == '') {
+       folders = folders.sublist(1);
+     }
+
+     createDir_(cwd, folders);
+   } else {
+     cwd.createDirectory(dirName, exclusive: true).then((entry) {
+       // Tell FSN visualizer that we're mkdir'ing.
+       //if (fsn_) {
+       //  fsn_.contentWindow.postMessage({cmd: 'mkdir', data: dirName}, location.origin);
+      // }
+     }, onError: (e) { invalidOpForEntryType(e, cmd, dirName); });
+   }
+}
 
 void createDir_(DirectoryEntry rootDirEntry, List<String> folders) {  
   var fHead = folders[0];
@@ -406,13 +403,14 @@ void createDir_(DirectoryEntry rootDirEntry, List<String> folders) {
   }, onError: errorHandler);
 }
 
-void open_(cmd, path, successCallback) {
+void openCommand(cmd, path) {
     if (fs == null) {
       return;
     }
 
-    cwd.getFile(path).then((entry) => successCallback(entry),
-        onError: (e) {
+    cwd.getFile(path).then((fileEntry) {
+      var myWin = window.open(fileEntry.toUrl(), 'mywin');
+    }, onError: (e) {
       if (e.code == FileError.NOT_FOUND_ERR) {
         output(cmd + ': ' + path + ': No such file or directory<br>');
       }
@@ -462,28 +460,6 @@ void testUnzip(String path) {
     errorHandler(e);
   });
 }
-/*
-Future<FileEntry> saveBlob(String name, Blob blob) {    
-   Future<FileEntry> ret = cwd.createFile(name)
-     .then((entry) => _writeBlob(entry, blob), 
-       onError: (e)  {
-         errorHandler(e.error);
-         throw e;
-     });
-     return ret;
- }
-
-Future<FileEntry> _writeBlob(FileEntry entry, Blob b) {
-    print("Writing blob ${entry.fullPath}");
-    
-    Future<FileEntry> writtenFut = entry.createWriter().then((writer) {     
-      writer.write(b);
-      print("blob written");
-      return entry;
-    });
-    return writtenFut;
-  }
-*/
 
 void historyHandler(e) { // Tab needs to be keydown.
   InputElement cmdLine = querySelector('#input-line .cmdline');
