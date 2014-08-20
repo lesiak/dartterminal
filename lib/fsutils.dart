@@ -31,20 +31,34 @@ class FileSystemUtils {
       readEntries();
   }
   
-  static Future read(DirectoryEntry dir, String path, successCallback) {
+  static Future readAsText(DirectoryEntry dir, String path, successCallback) {
     Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
           fileEntry.file().then((ff) {
             var reader = new FileReader();
 
             reader.onLoadEnd.first.then((e) {
               successCallback(reader.result);
-            });
-
+            });            
             reader.readAsText(ff);
           }, onError: _logFileError);
         });
     return readerFuture;
   }
+  
+  
+  static Future readAsArrayBuffer(DirectoryEntry dir, String path, successCallback) {
+      Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
+            fileEntry.file().then((ff) {
+              var reader = new FileReader();
+
+              reader.onLoadEnd.first.then((e) {
+                successCallback(reader.result);
+              });            
+              reader.readAsArrayBuffer(ff);
+            }, onError: _logFileError);
+          });
+      return readerFuture;
+    }
   
   static void _logFileError(FileError e) {
        var msg = '';

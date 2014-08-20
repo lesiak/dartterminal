@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:async';
 import 'package:dartterminal/fsutils.dart';
 import 'package:dartterminal/terminal.dart';
+import 'package:archive/archive.dart';
 import 'terminaldisplay.dart';
 
 void main() { 
@@ -75,14 +76,8 @@ void processNewCommand(KeyboardEvent e) {
          history.addNewItem(cmdLine.value);
        }
        
-      // Duplicate current input and append to output section.
-       DivElement line = cmdLine.parentNode.parentNode.clone(true);      
-       line.attributes.remove('id');
-       line.classes.add('line');
-       var input = line.querySelector('input.cmdline');
-       input.autofocus = false;
-       input.readOnly = true;
-       output_.append(line);
+       display.duplicateInputToOutput();
+      
       
        // Parse out command, args, and trim off whitespace.
        // TODO(ericbidelman): Support multiple comma separated commands.
@@ -331,6 +326,10 @@ void processNewCommand(KeyboardEvent e) {
            output(document.title +
                   ' - By: Eric Bidelman &lt;ericbidelman@chromium.org&gt;');
            break;*/
+         case 'testunzip':
+           String path = 'dupa.zip';
+           testUnzip(path);
+           break;
          default:
            if (cmd.isNotEmpty) {
              output(cmd + ': command not found');
@@ -343,6 +342,7 @@ void processNewCommand(KeyboardEvent e) {
      
    }
 }
+
 
 void addDroppedFiles(files) {
   files.forEach((file) {
@@ -362,7 +362,7 @@ void addDroppedFiles(files) {
 
 
 void output(String html) {
-  display.output(html);  
+  display.output(html);
 }
 
 
@@ -423,18 +423,67 @@ void open_(cmd, path, successCallback) {
 
 
 void read_(cmd, path, successCallback) {
-    if (fs == null) {
-      return;
-    }    
-    Future readerFuture = FileSystemUtils.read(cwd, path, successCallback);
-    readerFuture.catchError((e) {
-      if (e.code == FileError.TYPE_MISMATCH_ERR) {
-        output(cmd + ': ' + path + ': is a directory<br>');
-      } else if (e.code == FileError.NOT_FOUND_ERR) {
-        output(cmd + ': ' + path + ': No such file or directory<br>');
-      }
+  if (fs == null) {
+    return;
+  }    
+  Future readerFuture = FileSystemUtils.readAsText(cwd, path, successCallback);
+  readerFuture.catchError((e) {
+    if (e.code == FileError.TYPE_MISMATCH_ERR) {
+      output(cmd + ': ' + path + ': is a directory<br>');
+    } else if (e.code == FileError.NOT_FOUND_ERR) {
+      output(cmd + ': ' + path + ': No such file or directory<br>');
+    }
+  });
+}
+
+void testUnzip(String path) {     
+  if (fs == null) {
+    return;
+  }    
+  Future readerFuture = FileSystemUtils.readAsArrayBuffer(cwd, path, (List<int> bytes) {    
+    Archive archive = new ZipDecoder().decodeBytes(bytes);
+    for (ArchiveFile file in archive) {
+      String filename = file.name;
+      output(filename);
+      
+      List<int> data = file.content;
+      Blob blob = new Blob([data]);
+      saveBlob(filename, blob);
+      
+    }
+  });
+  readerFuture.catchError((e) {
+    /*if (e.code == FileError.TYPE_MISMATCH_ERR) {
+      output(cmd + ': ' + path + ': is a directory<br>');
+    } else if (e.code == FileError.NOT_FOUND_ERR) {
+      output(cmd + ': ' + path + ': No such file or directory<br>');
+    }*/
+       
+    errorHandler(e);
+  });
+}
+
+Future<FileEntry> saveBlob(String name, Blob blob) {    
+   Future<FileEntry> ret = cwd.createFile(name)
+     .then((entry) => _writeBlob(entry, blob), 
+       onError: (e)  {
+         _logFileError(e.error);
+         throw e;
+     });
+     return ret;
+ }
+
+Future<FileEntry> _writeBlob(FileEntry entry, Blob b) {
+    print("Writing blob ${entry.fullPath}");
+    
+    Future<FileEntry> writtenFut = entry.createWriter().then((writer) {     
+      writer.write(b);
+      print("blob written");
+      return entry;
     });
+    return writtenFut;
   }
+
 
 void historyHandler(e) { // Tab needs to be keydown.
   InputElement cmdLine = querySelector('#input-line .cmdline');

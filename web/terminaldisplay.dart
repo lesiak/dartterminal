@@ -2,6 +2,20 @@ import 'dart:html';
 
 class TerminalDisplay {
   
+  
+  
+  void duplicateInputToOutput() {
+    InputElement cmdLine = querySelector('#input-line .cmdline');
+    OutputElement output_ =  querySelector('output');
+    DivElement line = cmdLine.parentNode.parentNode.clone(true);      
+    line.attributes.remove('id');
+    line.classes.add('line');
+    var input = line.querySelector('input.cmdline');
+    input.autofocus = false;
+    input.readOnly = true;
+    output_.append(line);
+  }
+  
   void output(String html) {
     InputElement cmdLine = querySelector('#input-line .cmdline');
     OutputElement output_ =  querySelector('output');
