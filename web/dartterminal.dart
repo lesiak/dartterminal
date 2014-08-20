@@ -440,7 +440,8 @@ void testUnzip(String path) {
   if (fs == null) {
     return;
   }    
-  /*Future readerFuture = FileSystemUtils.readAsArrayBuffer(cwd, path, (List<int> bytes) {    
+  Future<List<int>> bytesFuture = FileSystemUtils.readAsArrayBuffer(cwd, path);
+  bytesFuture.then((List<int> bytes) {    
     Archive archive = new ZipDecoder().decodeBytes(bytes);
     for (ArchiveFile file in archive) {
       String filename = file.name;
@@ -451,8 +452,7 @@ void testUnzip(String path) {
       saveBlob(filename, blob);
       
     }
-  });
-  readerFuture.catchError((e) {
+  }).catchError((e) {
     /*if (e.code == FileError.TYPE_MISMATCH_ERR) {
       output(cmd + ': ' + path + ': is a directory<br>');
     } else if (e.code == FileError.NOT_FOUND_ERR) {
@@ -460,7 +460,7 @@ void testUnzip(String path) {
     }*/
        
     errorHandler(e);
-  });*/
+  });
 }
 
 Future<FileEntry> saveBlob(String name, Blob blob) {    

@@ -36,28 +36,41 @@ class FileSystemUtils {
     return readerFuture;
   }
   
-  static Future<String> _getTextFromFileEntry(FileEntry fileEntry) {
-    return fileEntry.file().then((ff) {
-      var reader = new FileReader();
-      Future<String> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
-      reader.readAsText(ff);
-      return resultFut;
-    });
-      
-  }
+  
   
   static Future<List<int>> readAsArrayBuffer(DirectoryEntry dir, String path/*, successCallback*/) {
-      Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
-            fileEntry.file().then((ff) {
-              var reader = new FileReader();
+    /*Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
+          fileEntry.file().then((ff) {
+            var reader = new FileReader();
 
-              reader.onLoadEnd.first.then((e) {
-               // successCallback(reader.result);
-              });            
-              reader.readAsArrayBuffer(ff);
-            });
+            reader.onLoadEnd.first.then((e) {
+             // successCallback(reader.result);
+            });            
+            reader.readAsArrayBuffer(ff);
           });
-      return readerFuture;
-    }   
+        });
+    return readerFuture;*/
+    Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) => _getArrayBufferFileEntry(fileEntry));
+    return readerFuture;
+  }
+  
+  static Future<String> _getTextFromFileEntry(FileEntry fileEntry) {
+      return fileEntry.file().then((ff) {
+        var reader = new FileReader();
+        Future<String> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
+        reader.readAsText(ff);
+        return resultFut;
+      });       
+    }
+  
+  static Future<List<int>> _getArrayBufferFileEntry(FileEntry fileEntry) {
+      return fileEntry.file().then((ff) {
+        var reader = new FileReader();
+        Future<List<int>> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
+        reader.readAsArrayBuffer(ff);
+        return resultFut;
+      });
+        
+    }
   
 }
