@@ -231,25 +231,10 @@ void processNewCommand(KeyboardEvent e) {
            // Remove each file passed as an argument.
            args.forEach((fileName) => rm(fileName, recursive, cmd));
            break;
-         /*case 'rmdir':
+         case 'rmdir':
            // Remove each directory passed as an argument.
-           args.forEach(function(dirName, i) {
-             cwd_.getDirectory(dirName, {}, function(dirEntry) {
-               dirEntry.remove(function() {
-                 // Tell FSN visualizer that we're rmdir'ing.
-                 if (fsn_) {
-                   fsn_.contentWindow.postMessage({cmd: 'rm', data: dirName}, location.origin);
-                 }
-               }, function(e) {
-                 if (e.code == FileError.INVALID_MODIFICATION_ERR) {
-                   output(cmd + ': ' + dirName + ': Directory not empty<br>');
-                 } else {
-                   errorHandler_(e);
-                 }
-               });
-             }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
-           });
-           break; */        
+           args.forEach((dirName) => rmDir(dirName, cmd));            
+           break;        
          case 'theme':
            String theme = args.join(' ');
            themeCommand(theme, cmd);
@@ -336,6 +321,23 @@ void rm(String name, bool recursive, String cmd) {
         errorHandler(e);
       }
   }));
+}
+
+void rmDir(String dirName, String cmd) {
+  cwd.getDirectory(dirName).then((dirEntry) {
+     dirEntry.remove().then((_x) {
+       // Tell FSN visualizer that we're rmdir'ing.
+       //if (fsn_) {
+       //  fsn_.contentWindow.postMessage({cmd: 'rm', data: dirName}, location.origin);
+      // }
+     }, onError: (e) {
+       if (e.code == FileError.INVALID_MODIFICATION_ERR) {
+         output(cmd + ': ' + dirName + ': Directory not empty<br>');
+       } else {
+         errorHandler(e);
+       }
+     });
+   }, onError: (e) { invalidOpForEntryType(e, cmd, dirName); });
 }
 
 void mkDir(String dirName, bool makeParents, String cmd){
