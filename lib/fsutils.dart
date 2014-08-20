@@ -31,46 +31,49 @@ class FileSystemUtils {
       readEntries();
   }
   
+  static Future<FileEntry> saveBlob(DirectoryEntry dir, String name, Blob blob) {    
+    Future<FileEntry> ret = dir.createFile(name).then((entry) => _writeBlob(entry, blob));
+     return ret;
+   }
+
+  static Future<FileEntry> _writeBlob(FileEntry entry, Blob b) {
+    print("Writing blob ${entry.fullPath}");
+    
+    Future<FileEntry> writtenFut = entry.createWriter().then((writer) {     
+      writer.write(b);
+      print("blob written");
+      return entry;
+    });
+    return writtenFut;
+  }
+
+  
   static Future<String> readAsText(DirectoryEntry dir, String path) {
     Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) => _getTextFromFileEntry(fileEntry));
     return readerFuture;
   }
-  
-  
-  
-  static Future<List<int>> readAsArrayBuffer(DirectoryEntry dir, String path/*, successCallback*/) {
-    /*Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) {
-          fileEntry.file().then((ff) {
-            var reader = new FileReader();
-
-            reader.onLoadEnd.first.then((e) {
-             // successCallback(reader.result);
-            });            
-            reader.readAsArrayBuffer(ff);
-          });
-        });
-    return readerFuture;*/
+    
+  static Future<List<int>> readAsArrayBuffer(DirectoryEntry dir, String path/*, successCallback*/) {    
     Future readerFuture = dir.getFile(path).then((FileEntry fileEntry) => _getArrayBufferFileEntry(fileEntry));
     return readerFuture;
   }
   
   static Future<String> _getTextFromFileEntry(FileEntry fileEntry) {
-      return fileEntry.file().then((ff) {
-        var reader = new FileReader();
-        Future<String> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
-        reader.readAsText(ff);
-        return resultFut;
-      });       
-    }
-  
+    return fileEntry.file().then((ff) {
+      var reader = new FileReader();
+      Future<String> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
+      reader.readAsText(ff);
+      return resultFut;
+    });       
+  }
+
   static Future<List<int>> _getArrayBufferFileEntry(FileEntry fileEntry) {
-      return fileEntry.file().then((ff) {
-        var reader = new FileReader();
-        Future<List<int>> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
-        reader.readAsArrayBuffer(ff);
-        return resultFut;
-      });
-        
-    }
+    return fileEntry.file().then((ff) {
+      var reader = new FileReader();
+      Future<List<int>> resultFut = reader.onLoadEnd.first.then((e) => reader.result);     
+      reader.readAsArrayBuffer(ff);
+      return resultFut;
+    });       
+  }
   
 }

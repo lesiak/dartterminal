@@ -9,7 +9,7 @@ void main() {
   InputElement cmdLine = querySelector('#input-line .cmdline');
   int fsQuota = 5*1024*1024*1024;
   window.requestFileSystem(fsQuota, persistent: true)
-             .then((fs) => _requestFileSystemCallback(fs), onError: (e) => _logFileError(e));
+             .then((fs) => _requestFileSystemCallback(fs), onError: (e) => errorHandler(e));
   cmdLine.addEventListener('keydown', processNewCommand, false);
   cmdLine.addEventListener('keyup', historyHandler, false); // keyup needed for input blinker to appear at end of input.
   
@@ -449,7 +449,7 @@ void testUnzip(String path) {
       
       List<int> data = file.content;
       Blob blob = new Blob([data]);
-      saveBlob(filename, blob);
+      FileSystemUtils.saveBlob(cwd, filename, blob);
       
     }
   }).catchError((e) {
@@ -462,7 +462,7 @@ void testUnzip(String path) {
     errorHandler(e);
   });
 }
-
+/*
 Future<FileEntry> saveBlob(String name, Blob blob) {    
    Future<FileEntry> ret = cwd.createFile(name)
      .then((entry) => _writeBlob(entry, blob), 
@@ -483,7 +483,7 @@ Future<FileEntry> _writeBlob(FileEntry entry, Blob b) {
     });
     return writtenFut;
   }
-
+*/
 
 void historyHandler(e) { // Tab needs to be keydown.
   InputElement cmdLine = querySelector('#input-line .cmdline');
