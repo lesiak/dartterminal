@@ -3,4 +3,4 @@ library fsutils;
 import 'dart:html';
 import 'dart:async';
 
-part 'src/filesystemutils.dart';
+part 'src/filesystem_utils.dart';

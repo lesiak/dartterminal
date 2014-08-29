@@ -73,4 +73,9 @@ class FileSystemUtils {
     });       
   }
   
+  static Future<bool> fileExists(DirectoryEntry dir, String fileName) {
+     Future<Entry> entryFut = dir.getFile(fileName);
+     return entryFut.then((Entry entry) => true, onError: (e) => false);               
+   }
+  
 }

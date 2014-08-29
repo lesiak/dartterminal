@@ -108,7 +108,14 @@ void processNewCommand(KeyboardEvent e) {
          case 'date':
            var now = new DateTime.now();           
            output(now.toString());
-           break;        
+           break;
+         case 'aaa':
+                             
+               output('aaa<br/>');
+               output(cwd.fullPath + "<br/>");
+               output(cwd.toString() + "<br/>");
+               output(cwd.toUrl() + "<br/>");
+                    break;   
          case 'help':
            output('<div class="ls-files">' + CMDS.join('<br>') + '</div>');
            output('<p>Add files by dragging them from your desktop.</p>');
