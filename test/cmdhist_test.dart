@@ -1,5 +1,5 @@
 import 'package:unittest/unittest.dart';
-import 'package:dartterminal/terminal.dart';
+import 'package:dartterminal/terminal_utils.dart';
 import 'package:unittest/html_config.dart';
 
 main() {

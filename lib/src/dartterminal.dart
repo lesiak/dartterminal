@@ -1,9 +1,6 @@
-import 'dart:html';
-import 'dart:async';
-import 'package:dartterminal/fsutils.dart';
-import 'package:dartterminal/terminal.dart';
-import 'package:archive/archive.dart';
-import 'terminaldisplay.dart';
+part of terminal;
+
+
 
 class DartTerminal {
   
@@ -15,41 +12,46 @@ class DartTerminal {
 
   FileSystem fs;
   DirectoryEntry cwd;
-  TerminalDisplay display = new TerminalDisplay();
+  TerminalDisplay display;
   CommandHistory history = new CommandHistory();
-
+  InputElement cmdLine;
+  OutputElement output_;
   
-  DartTerminal() {
-    InputElement cmdLine = querySelector('#input-line .cmdline');
+  DartTerminal(this.cmdLine, this.output_) {
+      display = new TerminalDisplay(cmdLine, output_);
       int fsQuota = 5*1024*1024*1024;
       window.requestFileSystem(fsQuota, persistent: true)
                  .then((fs) => _requestFileSystemCallback(fs), onError: (e) => errorHandler(e));
-      cmdLine.addEventListener('keydown', processNewCommand, false);
-      cmdLine.addEventListener('keyup', historyHandler, false); // keyup needed for input blinker to appear at end of input.
+      installEventHandlers();     
+  }
+  
+  void installEventHandlers() {
+    cmdLine.addEventListener('keydown', processNewCommand, false);
+    cmdLine.addEventListener('keyup', historyHandler, false); // keyup needed for input blinker to appear at end of input.
+    
+    document.body.addEventListener('dragenter', (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        document.body.classes.add('dropping');
+      }, false);
+
+      document.body.addEventListener('dragover', (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+      }, false);
+
+      document.body.addEventListener('dragleave', (e) {
+        document.body.classes.remove('dropping');
+      }, false);
       
-      document.body.addEventListener('dragenter', (e) {
-          e.stopPropagation();
-          e.preventDefault();
-          document.body.classes.add('dropping');
-        }, false);
-
-        document.body.addEventListener('dragover', (e) {
-          e.stopPropagation();
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-        }, false);
-
-        document.body.addEventListener('dragleave', (e) {
-          document.body.classes.remove('dropping');
-        }, false);
-        
-        document.body.addEventListener('drop', (e) {
-          e.stopPropagation();
-          e.preventDefault();
-          document.body.classes.remove('dropping');
-          addDroppedFiles(e.dataTransfer.files);
-          display.outputHtml('<div>File(s) added!</div>');
-        }, false);  
+      document.body.addEventListener('drop', (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        document.body.classes.remove('dropping');
+        addDroppedFiles(e.dataTransfer.files);
+        display.outputHtml('<div>File(s) added!</div>');
+      }, false);  
   }
   
   void _requestFileSystemCallback(FileSystem filesystem) {
@@ -58,9 +60,7 @@ class DartTerminal {
   }
 
 
-  void processNewCommand(KeyboardEvent e) {
-    OutputElement output_ =  querySelector('output');
-    InputElement cmdLine = querySelector('#input-line .cmdline');
+  void processNewCommand(KeyboardEvent e) {    
     String value = cmdLine.value;
 
        // Beep on backspace and no value on command line.
@@ -449,8 +449,7 @@ class DartTerminal {
      });    
   }
 
-  void historyHandler(e) { // Tab needs to be keydown.
-    InputElement cmdLine = querySelector('#input-line .cmdline');
+  void historyHandler(e) { // Tab needs to be keydown.    
     if (history.isNotEmpty) {
       if (e.keyCode == 38 || e.keyCode == 40) {
         bool isMoveUp = e.keyCode == 38;
@@ -517,7 +516,9 @@ class DartTerminal {
 }
 
 void main() {
-  DartTerminal dt = new DartTerminal();
+  InputElement cmdLine = querySelector('#input-line .cmdline');
+  OutputElement output_ =  querySelector('output');
+  DartTerminal dt = new DartTerminal(cmdLine, output_);
   
 }
 

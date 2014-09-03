@@ -1,13 +1,15 @@
-import 'dart:html';
-import 'dart:convert';
+part of terminal;
 
 class TerminalDisplay {
   
   static const THEMES = const ['default', 'cream'];
   
-  void duplicateInputToOutput() {
-    InputElement cmdLine = querySelector('#input-line .cmdline');
-    OutputElement output_ =  querySelector('output');
+  InputElement cmdLine;
+  OutputElement output_;
+  
+  TerminalDisplay(this.cmdLine, this.output_);
+  
+  void duplicateInputToOutput() {    
     DivElement line = cmdLine.parentNode.parentNode.clone(true);      
     line.attributes.remove('id');
     line.classes.add('line');
@@ -17,9 +19,7 @@ class TerminalDisplay {
     output_.append(line);
   }
   
-  void outputHtml(String html) {
-    InputElement cmdLine = querySelector('#input-line .cmdline');
-    OutputElement output_ =  querySelector('output');
+  void outputHtml(String html) {    
     output_.insertAdjacentHtml('beforeEnd', html);       
     cmdLine.scrollIntoView();
   }
@@ -31,8 +31,6 @@ class TerminalDisplay {
     }
 
   void clear() {
-    InputElement cmdLine = querySelector('#input-line .cmdline');
-    OutputElement output_ =  querySelector('output');
     output_.setInnerHtml('');
     cmdLine.value = '';
     document.documentElement.style.height = '100%';

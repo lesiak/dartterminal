@@ -1,0 +1,24 @@
+<!-- import polymer-element's definition -->
+<link rel="import" href="packages/polymer/polymer.html">
+
+<polymer-element name="dart-terminal-new" attributes="count">
+  <template>
+    <link rel="stylesheet" href="terminal.css">    
+    <div class="bodyDiv" style="height: 400px;">
+      <div class="interlace" style="height: 629px;"></div>
+      <div id="container">
+        <output>
+          <div>Welcome to HTML5 Terminal! (v1.0.0)</div>
+          14/8/2014 10:32:17
+          <p>Documentation: type "help"</p>
+        </output>
+      <div id="input-line" class="input-line">
+        <div class="prompt">$&gt;</div>
+        <div><input class="cmdline" autofocus=""></div>
+        </div>
+      </div>      
+    </div>
+  </template>
+  <script type="application/dart" src="dartterminalnew.dart"></script>
+</polymer-element>
+

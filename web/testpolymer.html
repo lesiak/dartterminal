@@ -11,18 +11,19 @@
     <script src="packages/web_components/dart_support.js"></script>
 
     <!-- import the click-counter -->
-    <link rel="import" href="clickcounter.html">
+    <link rel="import" href="dart-terminal-new.html">
     
-    <link rel="stylesheet" href="testpolymer.css">
+    <!--<link rel="stylesheet" href="terminal.css"> -->
+    <style>
+      body {
+        margin: 0;
+        height: 100%;
+      }
+    </style>
   </head>
-  <body>
-    <h1>TestPolymer</h1>
+  <body>          
+    <dart-terminal-new></dart-terminal-new>
     
-    <p>Hello world from Dart!</p>
-    
-    <div id="sample_container_id">
-      <click-counter count="5"></click-counter>
-    </div>
 
     <!-- bootstrap polymer -->
     <script type="application/dart">export 'package:polymer/init.dart';</script>
