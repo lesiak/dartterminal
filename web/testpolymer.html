@@ -19,11 +19,32 @@
         margin: 0;
         height: 100%;
       }
+      .fContainer {
+        position: relative;
+        
+        margin: 0;
+        padding: 0;
+        height: 600px;
+        min-height: 600px;
+        overflow-y: scroll;
+        background: -webkit-radial-gradient(center center, contain, rgba(0,150,0,1), black) center center no-repeat, black; /*center center for the gradient scrolls with the page :(*/
+  /*background: -webkit-radial-gradient(center 75%, contain, rgba(0,75,0,0.8), black) center center no-repeat, black;*/
+  -webkit-background-size: 110% 100%;
+      }
+
+      .fullheight {
+        display: block;
+        position: relative;
+        
+        height: 100%;
+        
+      }
     </style>
   </head>
-  <body>          
-    <dart-terminal-new></dart-terminal-new>
-    
+  <body>
+    <div class="fContainer">          
+    <dart-terminal-new class="fullheight"></dart-terminal-new>
+    </div>
 
     <!-- bootstrap polymer -->
     <script type="application/dart">export 'package:polymer/init.dart';</script>
