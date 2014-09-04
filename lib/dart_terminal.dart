@@ -1,5 +1,5 @@
 import 'package:polymer/polymer.dart';
-import 'package:dartterminal/terminal.dart';
+import 'package:dartterminal/terminal_impl.dart';
 import 'dart:html';
 
 /**
@@ -12,7 +12,7 @@ class DartTerminalNew extends PolymerElement {
   DartTerminalNew.created() : super.created() {    
     InputElement cmdLine = shadowRoot.querySelector('#input-line .cmdline');
     OutputElement output_ =  shadowRoot.querySelector('output');
-    DartTerminal dt = new DartTerminal(cmdLine, output_);
+    DartTerminalImpl dt = new DartTerminalImpl(cmdLine, output_);
   }
 
   void increment() {

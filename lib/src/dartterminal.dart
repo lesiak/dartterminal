@@ -1,8 +1,8 @@
-part of terminal;
+part of terminal_impl;
 
 
 
-class DartTerminal {
+class DartTerminalImpl {
   
   static const VERSION = '1.0.0';
   static const CMDS = const [
@@ -17,7 +17,7 @@ class DartTerminal {
   InputElement cmdLine;
   OutputElement output_;
   
-  DartTerminal(this.cmdLine, this.output_) {
+  DartTerminalImpl(this.cmdLine, this.output_) {
       display = new TerminalDisplay(cmdLine, output_);
       int fsQuota = 5*1024*1024*1024;
       window.requestFileSystem(fsQuota, persistent: true)

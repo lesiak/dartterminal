@@ -1,4 +1,4 @@
-part of terminal;
+part of terminal_impl;
 
 class TerminalDisplay {
   

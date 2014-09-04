@@ -1,4 +1,4 @@
-library terminal;
+library terminal_impl;
 
 import 'dart:html';
 import 'dart:async';
