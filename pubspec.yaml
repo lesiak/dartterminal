@@ -4,7 +4,7 @@ dependencies:
   browser: any
   unittest: any
   archive: any
-  polymer: ">=0.12.0 <0.13.0"
+  polymer: any
 transformers:
 - polymer:
     entry_points: web/testpolymer.html
